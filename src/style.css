@@ -1,0 +1,475 @@
+/* ================================================================
+   KOTAK NUSANTARA — Linktree
+   Layout: portrait-first, landscape = same centered column
+================================================================ */
+:root {
+  --purple:    #C084FC;
+  --orange:    #F97316;
+  --yellow:    #FACC15;
+  --pink:      #F472B6;
+  --teal:      #2DD4BF;
+  --cream:     #FFF8F0;
+  --cream-dim: #D4C5A9;
+  --bg:        #0D0B1A;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  overflow-x: hidden;
+}
+
+/* ── Scene top shade — gradient gelap diperpanjang ke bawah header
+   z-index 5 → di bawah items (z:10) tapi menutup bg glow
+   Mencegah konten header "terpotong" saat landscape
+────────────────────────────────────────────────── */
+.scene-top-shade {
+  position: absolute;
+  top: 0;
+  /* rentangkan ke full viewport width, bukan cuma 520px column */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  height: 42dvh;
+  background: linear-gradient(to bottom,
+    rgba(13,11,26,0.98) 0%,
+    rgba(13,11,26,0.88) 40%,
+    rgba(13,11,26,0.45) 72%,
+    transparent 100%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ── Scroll hint — bouncing indicator di bawah layar ── */
+.scroll-hint {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+.scroll-hint.hidden { opacity: 0; }
+
+.scroll-text {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+  opacity: 0.55;
+}
+
+.scroll-arrow {
+  font-size: 1.3rem;
+  color: var(--yellow);
+  opacity: 0.7;
+  animation: bounce 1.6s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0);   }
+  50%       { transform: translateY(7px); }
+}
+
+/* ── Fixed full-viewport gradient background ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 35% at 50%  5%, rgba(124,58,237,0.32) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 25% at 80% 40%, rgba(249,115,22,0.20) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 25% at 20% 70%, rgba(192,132,252,0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 20% at 55% 90%, rgba(45,212,191,0.10) 0%, transparent 50%),
+    linear-gradient(160deg, #0D0B1A 0%, #140F28 50%, #0D0B1A 100%);
+}
+
+/* ── Grain/noise ── */
+.noise {
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none; opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ================================================================
+   SCENE — centered column, both portrait & landscape
+================================================================ */
+.scene {
+  position: relative;
+  max-width: 520px;       /* centered column — kiri-kanan ada margin di landscape */
+  margin: 0 auto;
+  min-height: 460dvh;     /* 6 item × ~70dvh + header + footer */
+  background: transparent;
+}
+
+/* ================================================================
+   HEADER
+================================================================ */
+.site-header {
+  position: relative;
+  z-index: 30;
+  text-align: center;
+  padding: 36px 24px 18px;
+  background: transparent; /* shade ditangani oleh .scene-top-shade */
+}
+
+.site-kelompok {
+  font-size: clamp(0.58rem, 2.2vw, 0.78rem);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+  opacity: 0.65;
+  margin-bottom: 6px;
+}
+
+.site-title {
+  font-family: 'Caveat', cursive;
+  /* vmin = min(vw,vh) → ukuran konsisten portrait & landscape */
+  font-size: clamp(2.6rem, 13vmin, 5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  background: linear-gradient(135deg, var(--yellow) 0%, var(--orange) 45%, var(--purple) 85%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 24px rgba(249,115,22,0.45));
+  animation: fadeDown 0.7s ease both;
+}
+
+.site-subtitle {
+  font-family: 'Caveat', cursive;
+  font-size: clamp(0.95rem, 4vmin, 1.3rem);
+  color: var(--cream-dim);
+  margin-top: 4px;
+  opacity: 0.72;
+  animation: fadeDown 0.7s 0.1s ease both;
+}
+
+/* ================================================================
+   LINK ITEMS — all centered, stacked vertically
+================================================================ */
+.item {
+  position: absolute;
+  left: 50%;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* width: set per-item below so we can cap it */
+  width: min(64vw, 290px);
+}
+
+.item-link { display: block; text-decoration: none; }
+
+.sprite {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 10px 28px rgba(0,0,0,0.65));
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), filter 0.25s;
+}
+.item:hover .sprite,
+.item:focus-within .sprite {
+  transform: scale(1.07) rotate(2deg);
+  filter: drop-shadow(0 16px 36px rgba(0,0,0,0.7))
+          drop-shadow(0 0 22px rgba(192,132,252,0.45));
+}
+
+/* ── Positions: translateX(-50%) centers + individual rotation ── */
+/* animation is opacity-only so it doesn't fight the transform    */
+.pos-1 { top:  20dvh; transform: translateX(-50%) rotate(-3deg); }
+.pos-2 { top:  90dvh; transform: translateX(-50%) rotate( 4deg); }
+.pos-3 { top: 160dvh; transform: translateX(-50%) rotate(-2deg); }
+.pos-4 { top: 230dvh; transform: translateX(-50%) rotate( 3deg); }
+.pos-5 { top: 300dvh; transform: translateX(-50%) rotate(-4deg); }
+.pos-6 { top: 370dvh; transform: translateX(-50%) rotate( 2deg); }
+
+.pos-1 { animation: fadeIn 0.5s 0.10s both; }
+.pos-2 { animation: fadeIn 0.5s 0.25s both; }
+.pos-3 { animation: fadeIn 0.5s 0.40s both; }
+.pos-4 { animation: fadeIn 0.5s 0.55s both; }
+.pos-5 { animation: fadeIn 0.5s 0.70s both; }
+.pos-6 { animation: fadeIn 0.5s 0.85s both; }
+
+/* ── Label ── */
+.label {
+  position: static;          /* always below the sprite, in flow */
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Caveat', cursive;
+  font-size: clamp(1.15rem, 5vw, 1.55rem);
+  font-weight: 700;
+  color: var(--cream);
+  text-decoration: none;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.85);
+  margin-top: 10px;
+  transition: color 0.2s;
+}
+.label span { transition: transform 0.2s; }
+.label:hover span,
+.label:focus span { transform: translate(3px, -3px); }
+
+.pos-1 .label:hover { color: var(--orange); }
+.pos-2 .label:hover { color: var(--teal);   }
+.pos-3 .label:hover { color: var(--purple); }
+.pos-4 .label:hover { color: var(--pink);   }
+.pos-5 .label:hover { color: var(--yellow); }
+.pos-6 .label:hover { color: var(--orange); }
+
+/* ================================================================
+   BINTANG — stars-field adalah container absolute di scene
+   Isinya diisi JS: banyak bintang ✦✧ berbagai ukuran
+   Konsentrasi tinggi di dekat header, tersebar ke bawah
+================================================================ */
+.stars-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+  overflow: visible;
+}
+
+.star {
+  position: absolute;
+  color: var(--yellow);
+  pointer-events: none;
+  user-select: none;
+  line-height: 1;
+  animation: twinkle var(--dur, 3s) var(--delay, 0s) ease-in-out infinite;
+}
+
+/* ================================================================
+   FOOTER
+================================================================ */
+.site-footer {
+  position: absolute;
+  bottom: 24px;
+  left: 0; right: 0;
+  text-align: center;
+  font-family: 'Caveat', cursive;
+  font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+  color: var(--cream-dim);
+  opacity: 0.38;
+  letter-spacing: 0.06em;
+  z-index: 20;
+}
+
+/* ================================================================
+   ANIMATIONS
+================================================================ */
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-14px); }
+  to   { opacity: 1; transform: translateY(0);     }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes twinkle {
+  0%,100% { opacity: 0.8; transform: scale(1);   }
+  50%     { opacity: 0.1; transform: scale(0.6); }
+}
+
+/* ================================================================
+   LANDSCAPE tweak — layout sudah centered, tidak perlu override
+   Hanya pastikan kelompok text jangan terlalu kecil di wide
+================================================================ */
+@media (orientation: landscape) and (min-width: 700px) {
+  .site-kelompok { font-size: clamp(0.62rem, 1.4vmin, 0.8rem); }
+}
+
+/* ================================================================
+   LOG TUGAS PAGE
+================================================================ */
+
+/* Role section header */
+.role-section { margin-bottom: 48px; }
+
+.role-title {
+  font-family: 'Caveat', cursive;
+  font-size: clamp(1.3rem, 5vw, 1.8rem);
+  font-weight: 700;
+  color: var(--yellow);
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid rgba(250,204,21,0.25);
+  letter-spacing: 0.04em;
+}
+
+/* NIM below name */
+.member-nim {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--purple);
+  opacity: 0.75;
+  letter-spacing: 0.04em;
+  margin-top: -4px;
+}
+
+/* Role badge on card */
+.member-role {
+  font-family: 'Caveat', cursive;
+  font-size: 0.82rem;
+  color: var(--cream-dim);
+  opacity: 0.6;
+  margin-top: -2px;
+}
+.log-scene {
+  min-height: 100dvh;
+  background: transparent;  /* pakai body::before yang sudah fixed */
+  padding: 0 16px 80px;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.log-header { text-align: center; padding: 48px 16px 40px; }
+
+.log-title {
+  font-family: 'Caveat', cursive;
+  font-size: clamp(2rem, 8vw, 4rem);
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--yellow), var(--orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(249,115,22,0.4));
+}
+
+.log-subtitle {
+  font-family: 'Caveat', cursive;
+  font-size: clamp(1rem, 3.5vw, 1.2rem);
+  color: var(--cream-dim);
+  margin-top: 6px;
+  opacity: 0.75;
+}
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'Caveat', cursive;
+  font-size: clamp(1rem, 3.5vw, 1.1rem);
+  color: var(--cream-dim); text-decoration: none;
+  margin-top: 16px; transition: color 0.2s;
+}
+.back-link:hover { color: var(--yellow); }
+
+.member-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 28px;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.member-card {
+  flex: 0 0 130px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 10px;
+  cursor: pointer;
+  animation: fadeIn 0.5s both;
+}
+
+.member-photo-wrap {
+  width: 100px; height: 100px;
+  border-radius: 50%; overflow: hidden;
+  border: 3px solid rgba(192,132,252,0.4);
+  transition: border-color 0.25s,
+              transform 0.28s cubic-bezier(.34,1.56,.64,1),
+              box-shadow 0.25s;
+  background: #1a1430;
+}
+/* hover (desktop) */
+.member-card:hover .member-photo-wrap {
+  border-color: var(--purple);
+  transform: scale(1.1);
+  box-shadow: 0 0 24px rgba(192,132,252,0.5);
+}
+
+.member-photo { width: 100%; height: 100%; object-fit: cover; }
+
+.member-photo-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem;
+  background: linear-gradient(135deg, #1a1430, #2d1f52);
+  color: var(--purple);
+}
+
+.member-name {
+  font-family: 'Caveat', cursive;
+  font-size: 1.05rem; font-weight: 700;
+  color: var(--cream); text-align: center;
+}
+
+/* ── Shower overlay ── */
+.shower-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; flex-direction: column; align-items: center;
+  pointer-events: none; opacity: 0;
+  transition: opacity 0.3s;
+  background: rgba(13,11,26,0.88);
+  backdrop-filter: blur(6px);
+}
+.shower-overlay.active { opacity: 1; pointer-events: all; }
+
+.shower-close {
+  position: absolute; top: 20px; right: 24px;
+  font-size: 2.2rem; color: var(--cream-dim);
+  background: none; border: none; cursor: pointer;
+  font-family: 'Caveat', cursive; line-height: 1;
+  transition: color 0.2s, transform 0.2s; z-index: 10;
+}
+.shower-close:hover { color: var(--yellow); transform: scale(1.2) rotate(90deg); }
+
+.shower-member-name {
+  font-family: 'Caveat', cursive;
+  font-size: clamp(1.8rem, 6vw, 3rem); font-weight: 700;
+  color: var(--yellow); margin-top: 52px; text-align: center;
+  text-shadow: 0 0 20px rgba(250,204,21,0.55); z-index: 10;
+}
+
+.shower-subtitle {
+  font-family: 'Caveat', cursive; font-size: 1.1rem;
+  color: var(--cream-dim); margin-top: 4px; z-index: 10;
+}
+
+.shower-field {
+  position: absolute; inset: 0;
+  overflow: hidden; pointer-events: none;
+}
+
+.job-tag {
+  position: absolute; top: -64px;
+  font-family: 'Caveat', cursive;
+  font-size: clamp(1rem, 2.8vw, 1.35rem); font-weight: 700;
+  padding: 8px 20px; border-radius: 100px; white-space: nowrap;
+  animation: fall linear forwards; pointer-events: none;
+}
+
+@keyframes fall {
+  0%   { transform: translateY(0)   rotate(var(--r)) scale(0.7); opacity: 0; }
+  8%   { opacity: 1; transform: translateY(56px) rotate(var(--r)) scale(1); }
+  88%  { opacity: 1; }
+  100% { transform: translateY(var(--dist)) rotate(var(--r)); opacity: 0; }
+}
+
+.job-tag:nth-child(4n+1) { background:rgba(192,132,252,0.2); color:var(--purple); border:1.5px solid rgba(192,132,252,0.5); }
+.job-tag:nth-child(4n+2) { background:rgba(249,115,22, 0.2); color:var(--orange); border:1.5px solid rgba(249,115,22, 0.5); }
+.job-tag:nth-child(4n+3) { background:rgba(250,204,21, 0.15);color:var(--yellow); border:1.5px solid rgba(250,204,21, 0.4); }
+.job-tag:nth-child(4n)   { background:rgba(244,114,182,0.2); color:var(--pink);   border:1.5px solid rgba(244,114,182,0.5); }
