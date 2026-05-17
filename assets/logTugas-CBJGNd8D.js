@@ -1,0 +1,7 @@
+import"./style-Dm6ktkQY.js";var e=document.getElementById(`showerOverlay`),t=document.getElementById(`showerField`),n=document.getElementById(`showerName`),r=document.getElementById(`showerClose`),i=null,a=null;function o(e){let n=document.createElement(`span`);n.className=`job-tag`,n.textContent=e;let r=Math.random()*(window.innerWidth-240),i=(Math.random()-.5)*22,a=2.6+Math.random()*1.8,o=window.innerHeight+90;n.style.cssText=`
+    left: ${r}px;
+    --r: ${i}deg;
+    --dist: ${o}px;
+    animation-duration: ${a}s;
+    animation-delay: ${Math.random()*.35}s;
+  `,t.appendChild(n),n.addEventListener(`animationend`,()=>n.remove(),{once:!0})}function s(e){t.innerHTML=``,e.forEach(e=>o(e)),i=setInterval(()=>{e.forEach(e=>{Math.random()>.3&&o(e)})},700)}function c(){clearInterval(i),i=null}function l(t,r){n.textContent=t,e.classList.add(`active`),s(r)}function u(){e.classList.remove(`active`),c(),setTimeout(()=>{t.innerHTML=``},400)}var d=window.matchMedia(`(pointer: coarse)`).matches;document.querySelectorAll(`.member-card`).forEach(e=>{let t=e.dataset.name,n=JSON.parse(e.dataset.jobs||`[]`);d?e.addEventListener(`click`,()=>l(t,n)):(e.addEventListener(`mouseenter`,()=>{a=setTimeout(()=>l(t,n),280)}),e.addEventListener(`mouseleave`,()=>{clearTimeout(a)}))}),r.addEventListener(`click`,u),e.addEventListener(`click`,t=>{t.target===e&&u()}),document.addEventListener(`keydown`,e=>{e.key===`Escape`&&u()});
